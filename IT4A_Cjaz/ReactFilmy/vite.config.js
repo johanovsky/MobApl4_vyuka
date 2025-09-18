@@ -14,9 +14,9 @@ export default defineConfig({
     },
 
     manifest: {
-      name: 'ReactFilterFilmy',
-      short_name: 'ReactFilterFilmy',
-      description: 'ReactFilterFilmy',
+      name: 'ReactFilmy',
+      short_name: 'ReactFilmy',
+      description: 'Simple PWA React Filter',
       theme_color: '#ffffff',
     },
 
