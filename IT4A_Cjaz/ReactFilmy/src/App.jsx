@@ -15,7 +15,6 @@ function App() {
   const [hledZanr, setHledZanr] = useState("");
 
   //budeme potrebovat pole unik. zanry
-  //Sula (copilot) za 1
   const [uniqZanry, setUniqZanry] = useState([]);
 
   //Nacteni dat z API do pole dat
