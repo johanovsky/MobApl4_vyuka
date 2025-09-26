@@ -52,6 +52,8 @@ function App() {
     .then((data) => {
       setData(data);
 
+      //console.log(data);
+
       //vyfiltrujeme si unikatni zanry
       const zanry = [...new Set(data.map((item) => item.zanr))];
       setUniqZanry(zanry);
@@ -86,20 +88,33 @@ function App() {
     //stahnu vsechna data
     const filtered = getFilteredData();
 
-    //seradime si je
-    filtered.sort((a, b) => {
-      if(!orderBy) return 0;
-      const aVal = a[orderBy] || "";
-      const bVal = b[orderBy] || "";
-
-      //radime cisla
-      const aNum = Number(aVal);
-      const bNum = Number(bVal);
-
-      if(!isNaN(aNum) && !isNaN(bNum)) {
-        return orderDirection === "asc" ? aNum - bNum : bNum - aNum;
-      }
-    });
+    //razeni
+    if(orderBy) {
+      filtered.sort((a, b) => {
+        //stahnu si do pom konstant jenom hodnotu ze sloupce podle ktereho radim
+        const aVal = a[orderBy] ?? "";
+        const bVal = b[orderBy] ?? "";
+        //kontrola jestli jsou to obe cisla
+        const obojeJsouCisla = ((!isNaN(aVal)) && (!isNaN(bVal)))
+        
+        if(obojeJsouCisla) {
+          //radime jako cisla
+          return orderDirection === "asc" 
+            ? Number(aVal) - Number(bVal)
+            : Number(bVal) - Number(aVal);
+           
+           //if(orderDirection === "asc") {
+           // return Number(aVal) - Number(bVal);
+           //} else {
+           // return Number(bVal) - Number(aVal);
+           //}
+        }
+        //nejsou to cisla radime jako retezce
+        return orderDirection === "asc" 
+            ? String(aVal).localeCompare(String(bVal))
+            : String(bVal).localeCompare(String(aVal));
+      })
+    }
 
     //vykrojim pozadovany kousek
     return filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -107,8 +122,9 @@ function App() {
 
   //funkce pro zmenu smeru razeni
   const sortHandle = (column) => {
-    const isAsc = orderBy === column && orderDirection === "asc";
     setOrderBy(column);
+
+    const isAsc = orderBy === column && orderDirection === "asc";
     setOrderDirection(isAsc ? "desc" : "asc");
   }
 
@@ -147,22 +163,41 @@ function App() {
               <TableCell>
                 Nazev
               </TableCell>
-              <TableCell sortDirection={orderBy === "rok" ? orderDirection : false}>
+              <TableCell>
                 <TableSortLabel 
                   active={orderBy === "rok"}
                   direction={orderBy === "rok" ? orderDirection : "asc"}
                   onClick={() => sortHandle("rok")}
-                />
-                Rok vydani
+                >
+                  Rok vydani
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Zanr
+                <TableSortLabel 
+                    active={orderBy === "zanr"}
+                    direction={orderBy === "zanr" ? orderDirection : "asc"}
+                    onClick={() => sortHandle("zanr")}
+                >
+                  Zanr
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Hodnoceni
+                <TableSortLabel 
+                    active={orderBy === "hodnoceni"}
+                    direction={orderBy === "hodnoceni" ? orderDirection : "asc"}
+                    onClick={() => sortHandle("hodnoceni")}
+                  >
+                    Hodnoceni
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Delka
+                <TableSortLabel 
+                      active={orderBy === "delka"}
+                      direction={orderBy === "delka" ? orderDirection : "asc"}
+                      onClick={() => sortHandle("delka")}
+                >
+                  Delka
+                </TableSortLabel>
               </TableCell>
             </TableRow>
           </TableHead>
