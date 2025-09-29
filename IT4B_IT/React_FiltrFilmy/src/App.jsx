@@ -4,7 +4,7 @@ import {
   Box,
   Container, FormControl, InputLabel, MenuItem, Paper, 
   Select, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TablePagination, TableRow, TextField
+  TableHead, TablePagination, TableRow, TableSortLabel, TextField
 } from "@mui/material";
 
 function App() {
@@ -39,6 +39,16 @@ function App() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0); //navrat na prvni stranku
   }
+
+  //funkce pro nastaveni razeni
+  const handleSort = (column) => {
+    //nastavime sloupec podle ktereho budeme radit
+    setOrderBy(column);
+    //zjistime jestli uz se nahodou neradi vzestupne
+    const isAsc = ((orderBy === column) && (orderDirection === "asc"));
+    //jestlize se radi vzestupne, tak nyni radime sestupne
+    setOrderDirection(isAsc ? "desc" : "asc");
+  };
 
   useEffect(() => {
     fetch(API_URL)
@@ -81,7 +91,31 @@ function App() {
     //potrebuju vsechna data - uz vyfiltrovana
     const all_filtered = getFilteredData();
 
-    //some magic to do...
+    //kontrolni vypis
+    //console.log(all_filtered);
+
+    //razeni
+    if(orderBy) {
+      all_filtered.sort((a, b) => {
+        //vytahnu si dve hodnoty, ktere chci porovnat
+        const aVal = a[orderBy] ?? "";
+        const bVal = b[orderBy] ?? "";
+        
+        //kontrola jestli to jsou oboje cisla
+        const bothNumbers = (!isNaN(aVal) && !isNaN(bVal));
+
+        if(bothNumbers) {
+          return orderDirection === "asc"
+            ? Number(aVal) - Number(bVal)
+            : Number(bVal) - Number(aVal);
+        }
+        
+        //kdyz to nejsou cisla -> radime jako stringy
+        return orderDirection === "asc"
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      });
+    }
 
 
     //vratime pouze vyrez z vsech
@@ -130,16 +164,40 @@ function App() {
                 Název
               </TableCell>
               <TableCell>
-                Rok vydání
+                <TableSortLabel
+                  active={orderBy === "rok"}
+                  direction={orderBy === "rok" ? orderDirection : "asc"}
+                  onClick={() => handleSort("rok")}
+                >
+                  Rok vydání
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Žánr
+                <TableSortLabel
+                  active={orderBy === "zanr"}
+                  direction={orderBy === "zanr" ? orderDirection : "asc"}
+                  onClick={() => handleSort("zanr")}
+                >
+                  Žánr
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Hodnocení
+                <TableSortLabel
+                  active={orderBy === "hodnoceni"}
+                  direction={orderBy === "hodnoceni" ? orderDirection : "asc"}
+                  onClick={() => handleSort("hodnoceni")}
+                >
+                  Hodnocení
+                </TableSortLabel>
               </TableCell>
               <TableCell>
-                Délka filmu
+                <TableSortLabel
+                  active={orderBy === "delka"}
+                  direction={orderBy === "delka" ? orderDirection : "asc"}
+                  onClick={() => handleSort("delka")}
+                >
+                  Délka filmu
+                </TableSortLabel>
               </TableCell>
             </TableRow>
           </TableHead>
