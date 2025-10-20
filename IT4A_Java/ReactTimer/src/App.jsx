@@ -1,10 +1,58 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
+  const [seconds, setSeconds] = useState(getSecondsFromLocStor());
+  const [running, setRunning] = useState(getRunningFromLocStor());
+  const [beepEnabled, setBeepEnabled] = useState(true);
 
+  const intervaRef = useRef(null);
+
+  function getSecondsFromLocStor() {
+    const savedSeconds = localStorage.getItem("timerSeconds");
+    if(savedSeconds === null) {
+      return 0;
+    } else {
+      return parseInt(savedSeconds, 10);
+    }
+  }
+
+  function getRunningFromLocStor() {
+    const savedRunning = localStorage.getItem("timerRunning");
+    if(savedRunning === null) {
+      return false;
+    } else {
+      return (savedRunning === "true");
+    }
+  }
+
+  useEffect(() => {
+    if(running) {
+      intervaRef.current = setInterval(tick, 1000);
+
+      //ulozeni stav do localStorage
+      localStorage.setItem("timerSeconds", seconds.toString());
+      localStorage.setItem("timerRunning", running.toString());
+
+      return () => clearInterval(intervaRef.current);
+    }
+  }, [running, seconds]);
+
+  function tick() {
+    if(seconds <= 1) {
+      clearInterval(intervaRef.current);
+      showNot();
+      setRunning(false);
+      setSeconds(0);
+      //ulozeni stav do localStorage
+      localStorage.setItem("timerSeconds", "0");
+      localStorage.setItem("timerRunning", "false");
+    } else {
+      setSeconds(seconds - 1);
+    }
+  }
+
+  /*
   useEffect(() => {
     //kdyz je spustena casomira
     if(running) {
@@ -26,6 +74,7 @@ function App() {
       return () => clearInterval(int);
     }
   }, [running]);
+  */
 
   const showNot = async () => {
     //pozadame o povoleni posilat notifikace
@@ -36,29 +85,61 @@ function App() {
       const reg = await navigator.serviceWorker.ready;
       //console.log(reg);
       reg.showNotification("Odpočet doběhl");
+
+      //prehrati zvuku
+      if(beepEnabled) {
+        try {
+          const audio = new Audio("/beep.mp3");
+          await audio.play();
+        } catch(err) {
+          console.log("Nezdarilo se prehrati zvuku");
+        }
+      }
+
     } else {
       alert("Prosim povol notifikace");
     }
   };
 
+  /*
   //Pridavani casu do odpoctu
   const addSeconds = () => {
     setSeconds(seconds + 10);
   };
+  */
+  function addSeconds() {
+    setSeconds(seconds + 10);
+  }
 
+  /*
   //Odebirani casu do odpoctu
   const subSeconds = () => {
     if((seconds - 10) >= 0) {
       setSeconds(seconds - 10);
     }
   };
+  */
 
+  function subSeconds() {
+    if((seconds - 10) >= 0) {
+      setSeconds(seconds - 10);
+    }
+  }
+
+  /*
   //Spusteni odpoctu
   const launchTimer = () => {
     if(seconds > 0) {
       setRunning(true);
     }
   };
+  */
+
+  function launchTimer() {
+    if(seconds > 0) {
+      setRunning(true);
+    }
+  }
 
   return (
     <div>
@@ -82,6 +163,13 @@ function App() {
       >
         Launch
       </button>
+      <br />
+      <br />
+      <input 
+        type="checkbox"
+        checked={beepEnabled}
+        onChange={(e) => setBeepEnabled(e.target.checked)}
+      /> Zapnout zvukove notifikace
     </div>
   )
 }
