@@ -1,0 +1,23 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  /*text-align: center;*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#color_box {
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 200px;
+  height: 200px;
+}
+
+button {
+  margin: 10px;
+  width: 90%;
+  height: 50px;
+  border-radius: 10px;
+}

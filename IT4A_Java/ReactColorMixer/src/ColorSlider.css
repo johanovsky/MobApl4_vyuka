@@ -1,0 +1,10 @@
+#color_slider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
+#color_slider input[type="range"] {
+    width: 150%;
+}
