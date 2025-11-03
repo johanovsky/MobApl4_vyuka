@@ -1,0 +1,10 @@
+#main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
+#main input[type="range"] {
+    width: 150%;
+}
