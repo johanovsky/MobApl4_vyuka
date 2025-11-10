@@ -26,8 +26,17 @@ function App() {
 
       //otevreme save dialog -> k ziskani odkazu na soubor
       const handle = await window.showSaveFilePicker(options);
-
-      
+      //objekt typu FileSystemWriteableFileStream
+      const writable = await handle.createWritable();
+      //zapiseme data jako String do souboru
+      //data - co se zapisuje
+      //null - replacer (kdybych potreboval upravu dat)
+      //\t - odsazeni
+      await writable.write(JSON.stringify(data, null, "\t"));
+      //uzavreme zapis. proud
+      await writable.close();
+      //zapis se zdaril
+      alert("Zapsano do souboru");
     } catch(err) {
       console.log(err);
       alert("Ulozeni se nezdarilo, asi nepodporovany prohlizec");
@@ -35,7 +44,39 @@ function App() {
   }
 
   async function loadColor() {
-    
+    try {
+      //bez destruovani pole
+      const handles = await window.showOpenFilePicker();
+      const handle = handles[0];
+
+      /*
+      const [handle] = await window.showOpenFilePicker();
+      */
+
+      //potrebuji file
+      const file = await handle.getFile();
+      //precteme ten soubor jako string
+      const text = await file.text();
+      //precteme string jako JSON
+      const data = JSON.parse(text);
+
+      //z dat naplnime promenne
+      //varianta ??
+      setRed(data.red ?? 0);
+
+      //varianta if
+      if(data.green) {
+        setGreen(data.green);
+      } else {
+        setGreen(0);
+      }
+
+      setBlue(data.blue ?? 0);
+
+    } catch(err) {
+      console.log(err);
+      alert("Nacteni se nezdarilo");
+    }
   }
 
   return (
