@@ -25,8 +25,12 @@ function App() {
       }
       //otevreme dialog. okno pro ulozeni souboru -> dostaneme odkaz na soubor
       const fileHandle = await window.showSaveFilePicker(opt);
-      
-
+      //pripojime k souboru zapisovaci proud
+      const writable = await fileHandle.createWritable();
+      //zapiseme data pres proud
+      await writable.write(JSON.stringify(data, null, "\t"));
+      //uzavreme zapis. proud
+      await writable.close();
     } catch (err) {
       console.log(err);
       alert("Ulozeni se nezdarilo, asi nepodporovany prohlizec");
@@ -34,7 +38,31 @@ function App() {
   }
 
   async function loadColor() {
-    
+    try {
+      //potrebujeme odkaz na jeden soubor
+      //destruovani pole
+      //const [handle] = await window.showOpenFilePicker();
+      //bez destruovani
+      const fileHandles = await window.showOpenFilePicker();
+      const fileHandle = fileHandles[0];
+      //pres odkaz se dostaneme k souboru
+      const file = await fileHandle.getFile();
+      //precteme cely soubor do stringu
+      const text = await file.text();
+      //precteme cely string jako JSON
+      const data = JSON.parse(text);
+      //nastavime hodnoty
+      setRed(data.red ?? 0);
+      if(data.green == null) {
+        setGreen(0);
+      } else {
+        setGreen(data.green);
+      }
+      setBlue(data.blue ?? 0);
+    } catch(err) {
+      console.log(err);
+      alert("Nacteni se nezdarilo");
+    }
   }
 
   return (
