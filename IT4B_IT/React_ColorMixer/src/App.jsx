@@ -35,8 +35,6 @@ function App() {
       await writable.write(JSON.stringify(data, null, "\t"));
       //uzavreme zapis. proud
       await writable.close();
-      //zapis se zdaril
-      alert("Zapsano do souboru");
     } catch(err) {
       console.log(err);
       alert("Ulozeni se nezdarilo, asi nepodporovany prohlizec");
