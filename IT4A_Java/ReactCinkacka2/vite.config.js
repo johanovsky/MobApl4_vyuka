@@ -22,8 +22,32 @@ export default defineConfig({
 
     workbox: {
       globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-      cleanupOutdatedCaches: true,
-      clientsClaim: true,
+      runtimeCaching: [
+        {
+          urlPattern: ({ request }) => request.destination === 'document',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'html-cache',
+            expiration: { maxEntries: 10, maxAgeSeconds: 7 * 24 * 60 * 60 },
+          },
+        },
+        {
+          urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style',
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'assets-cache',
+            expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
+          },
+        },
+        {
+          urlPattern: ({ request }) => request.destination === 'image',
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'image-cache',
+            expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
+          },
+        },
+      ],
     },
 
     devOptions: {
