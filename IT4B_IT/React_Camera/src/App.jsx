@@ -10,6 +10,8 @@ function App() {
   //useRefs
   //odkaz do video-tagu
   const videoRef = useRef(null);
+  //odkaz do canvasu
+  const canvasRef = useRef(null);
 
   function startCamera() {
     //v aplikaci preklopim stav kamery na zapnuto
@@ -66,6 +68,26 @@ function App() {
     return () => stopCamera();
   }, []);
   
+  //funkce pro vyfoceni fotky
+  function takePhoto() {
+    //potrebuju se dostat k video-tagu
+    const video = videoRef.current;
+    //potrebuju canvas
+    const canvas = canvasRef.current;
+    //potrebuji vnitrek (context) canvasu pro malovani
+    const canv_context = canvas.getContext("2d");
+    //nastavime canvasu stejnou vysku a sirku jako ma video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    //pomoci kontextu namalujeme obrazek z video do canvasu
+    canv_context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    //prevedeme obrazek na bin. (base64) data
+    const data = canvas.toDataURL("image/png");
+    //tato data nastavime jako fotku
+    setPhoto(data);
+    //vypneme kameru
+    stopCamera();
+  }
 
   return (
     <div>
@@ -87,12 +109,31 @@ function App() {
               playsInline
               style={{width: "100%", maxWidth: "400px"}}
             /> 
-            <br />
+            <button onClick={takePhoto}>Vyfotit</button>
             <button onClick={stopCamera}>Vypni kameru</button>
           </div>
           :
           null)
       }
+      {
+        ((photo !== null) ?
+          <div>
+            <img
+              src={photo}
+              alt="fotka"
+              style={{ width: "100%", maxWidth: "400px"}}
+            />
+            <button onClick={() => {
+              setPhoto(null);
+              setIsCameraOn(true);
+            }}>Zpět</button>
+          </div>
+          :
+          null)
+      }
+
+      {/* Pro praci s obrazkem, ale nezobrazuji ho, proto je hidden */}
+      <canvas ref={canvasRef} hidden/>
     </div>
   )
 }
