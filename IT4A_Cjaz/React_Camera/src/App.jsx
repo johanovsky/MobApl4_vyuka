@@ -8,6 +8,7 @@ function App() {
   const [cameraOn, setCameraOn] = useState(false);
   //odkazy na komponent
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   //metoda ktera prepne stav kamery na zapnuto
   function switchCameraState() {
@@ -65,6 +66,26 @@ function App() {
     stopCamera();
   }, []);
 
+  function takePhoto() {
+    //potrebuju video-tag
+    const video = videoRef.current;
+    //potrebuju canvas
+    const canvas = canvasRef.current;
+    //vytvorime si context canvasu
+    const context = canvas.getContext("2d");
+    //nastavime vysku a sirku canvasu podle videa
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    //s pomoci kontextu "premaluju" to co vidim na kamere
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    //prevedeme obrazek do base64 formatu
+    const data = canvas.toDataURL("image/png");
+    //nastavime data do fotky
+    setPhoto(data);
+    //vypneme kameru
+    stopCamera();
+  }
+
   return (
     <div>
       <h1>React Camera</h1>
@@ -75,7 +96,6 @@ function App() {
           : null)}
         {/* pokud je priznak zapnuta kamera na true -> zobraz video-tag kam pak preposleme stream z kamery */}
         {
-          //Senekl 1
           ((cameraOn === true) ?
           <div> 
             <video
@@ -84,10 +104,33 @@ function App() {
               playsInline
               style={{ width:"100%", maxWidth:"400px" }}
             /><br />
-            <button onClick={stopCamera}>Vypnout kameru</button> 
+            <button onClick={stopCamera}>Vypnout kameru</button>
+            <br />
+            <br />
+            <button onClick={takePhoto}>Vyfotit</button>
           </div>
           : null)
         }
+        {
+          //Kdyz mam fotku, tak ji zobrazim
+          ((photo !== null) ?
+          <div>
+            <img 
+              src={photo}
+              alt="fotka"
+              style={{ width: "100%", maxWidth: "400px" }}
+            />
+            <br />
+            <button onClick={() => {
+              setPhoto(null);
+              setCameraOn(true);
+            }}>Zpět</button>
+          </div>
+          : null)
+        }
+
+        {/* tady bude hidden canvas */}
+        <canvas ref={canvasRef} hidden />
       </div>
     </div>
   )
