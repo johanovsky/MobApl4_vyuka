@@ -7,6 +7,10 @@ function App() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   //pro fotku
   const [photo, setPhoto] = useState(null);
+  //useState s vybranou kamerou - def. bude zadni kamera
+  const [cameraMode, setCameraMode] = useState("environment");
+  //useState jestli zrcadlim nebo ne
+  const [cameraMirrored, setCameraMirrored] = useState(false);
   //useRefs
   //odkaz do video-tagu
   const videoRef = useRef(null);
@@ -18,16 +22,12 @@ function App() {
     setIsCameraOn(true);
   }
 
-  useEffect(() => {
-    if(isCameraOn === true) {
-      enableCamera();
-    }
-  }, [isCameraOn]);
-
   async function enableCamera() {
+    //nez budeme zapinat kameru, tak ji vypneme
+    disableCamera();
     //pozadame o pristup ke kamere
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user" } //user - predni / enviroment - zadni
+      video: { facingMode: {ideal: cameraMode} } //user - predni / environment - zadni
     });
     //pokud je vykresleny video-tag
     if(videoRef.current) {
@@ -44,7 +44,8 @@ function App() {
     }
   }
 
-  function stopCamera() {
+  //vypnuti fyzicke kamery
+  function disableCamera() {
     //nejprve stahnu z video-tagu stream
     let stream = null;
     if(videoRef.current) {
@@ -59,9 +60,24 @@ function App() {
     if(tracks !== null) {
       tracks.forEach(track => track.stop());
     }
-    //prepneme kameru v aplikaci jako vypnutou
-    setIsCameraOn(false);
   }
+
+  //metoda ktera vypne kameru (jak fyzicky, tak v aplikaci)
+  function stopCamera() {
+    setIsCameraOn(false);
+    disableCamera();
+  }
+
+  useEffect(() => {
+    if(isCameraOn === true) {
+      enableCamera();
+    }
+
+    //doplnime vypnuti kamery po dobehnuti effectu
+    return () => {
+      disableCamera();
+    }
+  }, [isCameraOn, cameraMode]);
 
   //vypnuti a radne ukonceni streamu pri obnove stranky
   useEffect(() => {
@@ -79,6 +95,15 @@ function App() {
     //nastavime canvasu stejnou vysku a sirku jako ma video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    //ulozime si stav kontextu
+    canv_context.save();
+    //pokud je zapnute zrcadleni
+    if(cameraMirrored === true) {
+      //posuneme souradnice
+      canv_context.translate(canvas.width, 0);
+      //horizontalni zrcadlo
+      canv_context.scale(-1, 1);
+    }
     //pomoci kontextu namalujeme obrazek z video do canvasu
     canv_context.drawImage(video, 0, 0, canvas.width, canvas.height);
     //prevedeme obrazek na bin. (base64) data
@@ -87,6 +112,37 @@ function App() {
     setPhoto(data);
     //vypneme kameru
     stopCamera();
+  }
+
+  function savePhoto() {
+    //vytvorime docasny odkaz
+    const link = document.createElement("a");
+    //do url linku dame data
+    link.href = photo;
+    //nastavime jmeno obrazku
+    link.download = "fotka.png";
+    //link pridame do stranky
+    document.body.appendChild(link);
+    //"klikneme" na stazeni
+    link.click();
+    //docasny odkaz zahodime
+    document.body.removeChild(link);
+  }
+
+  function switchCameraMode() {
+    if(cameraMode === "environment") {
+      setCameraMode("user");
+    } else {
+      setCameraMode("environment");
+    }
+  }
+
+  function switchMirrored() {
+    if(cameraMirrored === true) {
+      setCameraMirrored(false);
+    } else {
+      setCameraMirrored(true);
+    }
   }
 
   return (
@@ -107,9 +163,15 @@ function App() {
               ref={videoRef}
               autoPlay
               playsInline
-              style={{width: "100%", maxWidth: "400px"}}
+              style={{
+                width: "100%", 
+                maxWidth: "400px",
+                transform: ((cameraMirrored) ? "scaleX(-1)" : "scaleX(1)")
+              }}
             /> 
             <button onClick={takePhoto}>Vyfotit</button>
+            <button onClick={switchCameraMode}>Přepni kameru</button>
+            <button onClick={switchMirrored}>Přepni zrcadleni</button>
             <button onClick={stopCamera}>Vypni kameru</button>
           </div>
           :
@@ -123,6 +185,7 @@ function App() {
               alt="fotka"
               style={{ width: "100%", maxWidth: "400px"}}
             />
+            <button onClick={savePhoto}>Uložit</button>
             <button onClick={() => {
               setPhoto(null);
               setIsCameraOn(true);
