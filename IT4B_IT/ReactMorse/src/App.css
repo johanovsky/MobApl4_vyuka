@@ -1,0 +1,21 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+#root>div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+textarea, button, #morseCode {
+  width: 100%;
+  border: 1px solid black;
+  font-size: x-large;
+  margin: 20px 0;
+  padding: 10px;
+  border-radius: 10px;
+}
