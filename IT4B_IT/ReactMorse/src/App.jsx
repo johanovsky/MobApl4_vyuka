@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import './App.css'
+import { useRef } from 'react';
 
 function App() {
+  //useStates
   const [text, setText] = useState("");
   const [morse, setMorse] = useState("");
+
+  //useRefs - odkaz pro pristup k streamu kamery
+  const videoTrackRef = useRef(null);
 
   const morseAlphabeth = [".-", "-...", "-.-.", "-..", ".", "..-.",
     "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---",
@@ -18,6 +23,10 @@ function App() {
   const BEEP_CARKA = VIB_CARKA;
   const BEEP_PAUSE = VIB_PAUSE;
   const BEEP_FREQ = 500;
+
+  const LED_TECKA = VIB_TECKA;
+  const LED_CARKA = VIB_CARKA;
+  const LED_PAUSE = VIB_PAUSE;
 
   function prevodMorse() {
     let vysledek = "";
@@ -133,6 +142,88 @@ function App() {
     }
   }
 
+  async function pripravKameru() {
+    //kontrola jestli uz nahodou pripravena
+    if(videoTrackRef.current !== null) {
+      //pokud to spadne sem, kamera je pripravena, zbytek funkce je zvytecny
+      return;
+    }
+    //pokud kamera neni aktivni -> zapneme zadni kameru
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {facingMode: "environment"}
+    });
+    //stopu z streamu si ulozim do reference
+    videoTrackRef.current = stream.getVideoTracks()[0];
+  }
+
+  function vypniKameru() {
+    if(videoTrackRef.current !== null) {
+      //kamera jede, budeme vypinat
+      //zastavime stream
+      videoTrackRef.current.stop();
+      //nastavime referenci na null
+      videoTrackRef.current = null;
+    }
+  }
+
+  //funkce pro rozsviceni (true) / zhasnuti (false) ledky
+  async function setCameraLed(state) {
+    //kontrola
+    if(videoTrackRef.current === null) {
+      //kamera nejede, neblikame -> konec
+      return;
+    }
+    //kdyz to projde az sem -> kamera jede
+    await videoTrackRef.current.applyConstraints({
+      advanced: [{ torch: state}]
+    });
+  }
+
+  async function blikatMorse() {
+    try {
+      //zapneme kameru
+      await pripravKameru();
+
+      //prochazime morseovku
+      for(let i = 0; i < morse.length; i++) {
+        //vytahnu akt. znak
+        const znak = morse[i];
+        //je-li to tecka
+        if(znak === ".") {
+          //rozsvit
+          await setCameraLed(true);
+          //pockame tecku
+          await pockej(LED_TECKA);
+          //zhasneme
+          await setCameraLed(false);
+          //cekame pauzu
+          await pockej(LED_PAUSE);
+        //je-li to carka
+        } else if(znak === "-") {
+          //rozsvit
+          await setCameraLed(true);
+          //pockame carku
+          await pockej(LED_CARKA);
+          //zhasneme
+          await setCameraLed(false);
+          //cekame pauzu
+          await pockej(LED_PAUSE);
+        //je-li to lomitko
+        } else if(znak === "/") {
+          //pockame delsi pauzu
+          await pockej(2 * LED_PAUSE);
+        } 
+      }
+
+    } catch(e) {
+      //co se stane kdyz nastane vyjimka
+      alert("LED neni dostupna");
+    } finally {
+      //kod co se spusti vzdy
+      vypniKameru();
+    }
+  }
+
   return (
     <div>
       <h1>React Morse Code</h1>
@@ -167,6 +258,11 @@ function App() {
         onClick={pipatMorse}
       >
         Pipat morseovku
+      </button>
+      <button
+        onClick={blikatMorse}
+      >
+        Blikat morseovku
       </button>
     </div>
   )
