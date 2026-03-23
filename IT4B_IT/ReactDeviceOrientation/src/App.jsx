@@ -51,6 +51,25 @@ function App() {
     };
   }, []);
 
+  //pomocna funkce
+  function correct(value, max) {
+    let res = value;
+    //hodnota nesmi byt vetsi jak max
+    if(res > max) {
+      res = max;
+    }
+    //hodnota nesmi byt mensi jak -max
+    if(res < -max) {
+      res = -max;
+    }
+    return res;
+  }
+
+  //spocitame x a y pro vodovahu
+  const MAX = 100;
+  const x = correct(gamma, MAX);
+  const y = correct(beta, MAX);
+
   return (
     <div>
       <h1>Device orientation</h1>
@@ -60,9 +79,20 @@ function App() {
         {(sensors === false) ? "Zapnout senzory" : "Vypnout senzory"}
       </button>
       {/* schovame divy, pokud jsou senzory vypnute */}
-      {((sensors === true) ? <div>alpha: {alpha.toFixed(0)}</div> : null)}
-      {((sensors === true) ? <div>beta:  {beta.toFixed(0)} </div> : null)}
-      {((sensors === true) ? <div>gamma: {gamma.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">alpha: {alpha.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">beta:  {beta.toFixed(0)} </div> : null)}
+      {((sensors === true) ? <div className="sensors">gamma: {gamma.toFixed(0)}</div> : null)}
+      {/* vodovaha */}
+      {((sensors === true) ?
+        <div className="area">
+          <div 
+            className="dot"
+            style={{
+              transform: "translate(-50%, -50%) translate(" + x + "px, " + y + "px)"
+            }}
+          ></div>
+        </div>
+      : null)}
     </div>
   )
 }

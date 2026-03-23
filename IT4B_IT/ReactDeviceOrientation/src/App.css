@@ -14,7 +14,7 @@
   padding: 10px;
 }
 
-#root>div>div, button {
+.sensors, button, .area {
   border: 1px solid black;
   border-radius: 10px;
   padding: 10px;
@@ -24,4 +24,48 @@
 
 button {
   width: 100%;
+}
+
+/* styl pro vodovahu */
+.area {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%; 
+  position: relative
+}
+
+/* osa y v area */
+.area::before {
+  content: "";
+  position: absolute;
+  width: 1px; 
+  height: 100%;
+  background: silver;
+  left: 50%;
+  top: 0;
+}
+ 
+/* osa x v area */
+.area::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 100%;
+  background: silver;
+  left: 0px;
+  top: 50%;
+}
+
+/* tecka v area */
+.dot {
+  width: 20px;
+  height: 20px;
+  background: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* tohle ted resime v JSX */
+  /*transform: translate(-50%, -50%);*/
+  z-index: 1;
 }
