@@ -58,6 +58,27 @@ function App() {
     return ()=> window.removeEventListener("deviceorientation", zmenUhly);
   }, []);
 
+  //pomocna funkce na omezeni minima a maxima
+  function constrain(value, max) {
+    let res = value;
+    //hodnota nesmi byt vetsi jak max
+    if(res > max) {
+      //kdyz ano, oriznu na max
+      res = max;
+    }
+    //hodnota nesmi byt mensi jak -max
+    if(res < -max) {
+      //kdyz ano, oriznu na -max
+      res = -max;
+    }
+    return res;
+  }
+
+  //prevedeme beta a gama na x a y
+  const MAX = 100;
+  const x = constrain(gamma, MAX);
+  const y = constrain(beta, MAX);
+
   return (
     <div>
       <h1>React Device Orientation</h1>
@@ -66,9 +87,18 @@ function App() {
       >
         Zapnout senzory
       </button>
-      {((sensors === true) ? <div>alpha: {alpha.toFixed(0)}</div> : null)}
-      {((sensors === true) ? <div>beta:  {beta.toFixed(0)} </div> : null)}
-      {((sensors === true) ? <div>gamma: {gamma.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">alpha: {alpha.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">beta:  {beta.toFixed(0)} </div> : null)}
+      {((sensors === true) ? <div className="sensors">gamma: {gamma.toFixed(0)}</div> : null)}
+
+      {((sensors === true) ?
+        <div className="area">
+          <div 
+            className="dot"
+            style={{transform: "translate(-50%, -50%) translate(" + x + "px, " + y + "px)"}}
+          ></div>
+        </div>
+      : null)}
     </div>
   )
 }
