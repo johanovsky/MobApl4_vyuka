@@ -56,6 +56,28 @@ function App() {
     }
   }, []);
 
+  //pomocna funkce pro udrzeni hodnoty v rozsahu -max az max
+  function limit(value, max) {
+    let res = value;
+    //hodnota nesmi byt vetsi jak max
+    if(res > max) {
+      //pokud ano, oriznu na max
+      res = max;
+    }
+    //hodnota nesmi byt mensi jak -max
+    if(res < -max) {
+      //pokud ano, oriznu na -max
+      res = -max;
+    }
+    //vratime res
+    return res;
+  }
+
+  //vypocet x a y
+  const MAX = 100;
+  const x = limit(gamma, MAX);
+  const y = limit(beta, MAX);
+
   return (
     <div>
       <h1>Device orientation</h1>
@@ -64,9 +86,19 @@ function App() {
       >
         Zapnou senzory
       </button>
-      {((sensors === true) ? <div>alpha: {alpha.toFixed(0)}</div> : null)}
-      {((sensors === true) ? <div>beta:  {beta.toFixed(0)} </div> : null)}
-      {((sensors === true) ? <div>gamma: {gamma.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">alpha: {alpha.toFixed(0)}</div> : null)}
+      {((sensors === true) ? <div className="sensors">beta:  {beta.toFixed(0)} </div> : null)}
+      {((sensors === true) ? <div className="sensors">gamma: {gamma.toFixed(0)}</div> : null)}
+
+      {((sensors === true) ?
+        <div className="area">
+          <div 
+            className="dot"
+            style={{transform: "translate(-50%, -50%) translate(" + x + "px, " + y + "px)"}}
+          >
+          </div>
+        </div>
+      : null)}
     </div>
   )
 }

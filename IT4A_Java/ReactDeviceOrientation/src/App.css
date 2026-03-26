@@ -11,7 +11,7 @@
   align-items: center;
 }
 
-#root>div>div, button {
+.sensors, button, .area {
   border: 1px solid black;
   border-radius: 10px;
   padding: 10px;
@@ -21,4 +21,47 @@
 
 button {
   width: 100%;
+}
+
+/* styl pro vodovahu */
+.area {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  position: relative;
+}
+
+/* svisla osa area - y */
+.area::before {
+  content: ""; 
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background: silver; 
+  left: 50%;
+  top: 0;
+}
+
+/* vodorovna osa area - x */
+.area::after {
+ content: ""; 
+ position: absolute;
+ width: 100%;
+ height: 1px;
+ background: silver;
+ top: 50%;
+ left: 0;
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: red;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  /*toto zde nebude, protoze to musi do JSX*/
+  /*transform: translate(-50%, -50%);*/
 }
